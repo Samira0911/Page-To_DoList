@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>To Do List - Tâches restantes</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <div class="user-info">
+        <h2>Samira<br>To do list</h2>
+    </div>
+    <nav>
+        <a href="index.html">Accueil</a>
+        <a href="taches_restantes.html">Tâches restantes</a>
+        <a href="taches_terminees.html">Tâches terminées</a>
+    </nav>
+</header>
+
+<main>
+    <section class="task-list">
+        <h3><strong>Tâches restantes</strong></h3>
+        <div id="taskContainer">
+            <ul id="remainingTasks">
+                <!-- Les tâches restantes seront affichées ici -->
+            </ul>
+        </div>
+    </section>
+</main>
+
+<footer>
+    Designed by Samira - Mai 2025
+</footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const remainingTasksList = document.getElementById('remainingTasks');
+
+        // Charger les tâches depuis localStorage
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        // Filtrer les tâches restantes
+        const remainingTasks = tasks.filter(task => task.status === 'not-completed');
+
+        // Afficher les tâches restantes
+        remainingTasks.forEach(task => {
+            const li = document.createElement('li');
+            li.dataset.id = task.id;
+            li.classList.add(task.priority === 'haute' ? 'priority-haute' :
+                             task.priority === 'normale' ? 'priority-normale' :
+                             'priority-basse');
+
+            li.innerHTML = `
+                <span class="task-name">${task.name}</span>
+                <div class="task-date-time">
+                    <div>${task.date}</div>
+                    <div>${task.time}</div>
+                </div>
+            `;
+            remainingTasksList.appendChild(li);
+        });
+    });
+</script>
+</body>
+</html>

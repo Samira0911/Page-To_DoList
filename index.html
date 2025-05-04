@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>To Do List - Accueil</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <div class="user-info">
+        <h2>Samira<br>To do list</h2>
+    </div>
+    <nav>
+        <a href="index.html">Accueil</a>
+        <a href="taches_restantes.html">Tâches restantes</a>
+        <a href="taches_terminees.html">Tâches terminées</a>
+    </nav>
+</header>
+
+<main>
+    <section class="add-task">
+        <h3>Ajouter une tâche</h3>
+        <form id="taskForm">
+            <input type="text" id="taskName" placeholder="Description de la tâche" required>
+            <input type="date" id="taskDate" required>
+            <input type="time" id="taskTime" required>
+            <select id="taskPriority">
+                <option value="haute">Haute</option>
+                <option value="normale">Normale</option>
+                <option value="basse">Basse</option>
+            </select>
+            <button type="submit">Ajouter</button>
+        </form>
+    </section>
+
+    <section class="task-list">
+        <h3><strong>Liste des tâches</strong></h3>
+        <div id="taskContainer">
+            <ul id="allTasks">
+                <!-- Les tâches seront générées dynamiquement ici -->
+            </ul>
+        </div>
+    </section>
+</main>
+
+<footer>
+    Designed by Samira - Mai 2025
+</footer>
+
+<script src="script.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const taskForm = document.getElementById('taskForm');
+        const allTasks = document.getElementById('allTasks');
+
+        // Charger les tâches sauvegardées depuis localStorage
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        function renderTasks() {
+            allTasks.innerHTML = '';
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.dataset.id = task.id;
+                li.dataset.status = task.status;
+                li.classList.add(task.priority === 'haute' ? 'priority-haute' :
+                                 task.priority === 'normale' ? 'priority-normale' :
+                                 'priority-basse');
+
+                li.innerHTML = `
+                    <div class="task-content">
+                        <span class="task-name">${task.name}</span>
+                        <div class="task-date-time">
+                            <div>${task.date}</div>
+                            <div>${task.time}</div>
+                        </div>
+                        <div class="status-icons">
+                            <select class="task-status">
+                                <option value="not-completed" ${task.status === 'not-completed' ? 'selected' : ''}>Pas fait</option>
+                                <option value="completed" ${task.status === 'completed' ? 'selected' : ''}>Fait</option>
+                            </select>
+                            <button class="edit-task" title="Modifier">Modifier</button>
+                            <button class="delete-task" title="Supprimer">Supprimer</button>
+                        </div>
+                    </div>
+                `;
+                allTasks.appendChild(li);
+
+                // Ajouter les événements pour les boutons
+                li.querySelector('.edit-task').addEventListener('click', () => editTask(task.id));
+                li.querySelector('.delete-task').addEventListener('click', () => deleteTask(task.id));
+            });
+        }
+
+        taskForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('taskName').value;
+            const date = document.getElementById('taskDate').value;
+            const time = document.getElementById('taskTime').value;
+            const priority = document.getElementById('taskPriority').value;
+
+            const newTask = {
+                id: Date.now().toString(),
+                name,
+                date,
+                time,
+                priority,
+                status: 'not-completed'
+            };
+            tasks.push(newTask);
+            saveTasks();
+            renderTasks();
+            taskForm.reset();
+        });
+
+        allTasks.addEventListener('change', (event) => {
+            const target = event.target;
+            const taskItem = target.closest('li');
+            if (!taskItem) return;
+
+            const taskId = taskItem.dataset.id;
+            const task = tasks.find(t => t.id === taskId);
+
+            if (target.classList.contains('task-status')) {
+                task.status = target.value;
+                saveTasks();
+                renderTasks();
+            }
+        });
+
+        function editTask(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            const newName = prompt("Modifier le nom de la tâche :", task.name);
+            if (newName) {
+                task.name = newName;
+                saveTasks();
+                renderTasks();
+            }
+        }
+
+        function deleteTask(taskId) {
+            if (confirm("Êtes-vous sûr de vouloir supprimer cette tâche ?")) {
+                tasks = tasks.filter(t => t.id !== taskId);
+                saveTasks();
+                renderTasks();
+            }
+        }
+
+        // Premier rendu des tâches existantes
+        renderTasks();
+    });
+</script>
+</body>
+</html>
